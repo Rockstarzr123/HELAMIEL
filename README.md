@@ -4,6 +4,8 @@
 
 Proyecto Java orientado a objetos para la gestion de productos usando JDBC y MySQL. La estructura sigue el patron MVC, separando la conexion, el modelo, el acceso a datos y la vista de consola.
 
+Este proyecto forma parte de la creacion y seguimiento de producto virtual para la empresa HELAMIEL.
+
 ## Tecnologias
 
 - Java 17
