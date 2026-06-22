@@ -1,0 +1,228 @@
+:root {
+    --helamiel-primary: #2f80ed;
+    --helamiel-primary-dark: #1c5eb7;
+    --helamiel-mint: #42c6a4;
+    --helamiel-pink: #f27aa7;
+    --helamiel-cream: #ffe7a3;
+    --helamiel-ink: #1f2937;
+    --helamiel-soft: #f5f8fb;
+}
+
+body {
+    min-height: 100vh;
+    background: var(--helamiel-soft);
+    color: var(--helamiel-ink);
+}
+
+.app-navbar {
+    background: linear-gradient(90deg, #255da8, #2f80ed 55%, #42c6a4);
+    box-shadow: 0 10px 24px rgba(31, 41, 55, 0.12);
+}
+
+.page-shell {
+    min-height: calc(100vh - 136px);
+    padding: 32px 0 48px;
+}
+
+.app-footer {
+    padding: 18px 0;
+    background: #ffffff;
+    border-top: 1px solid #e5e7eb;
+    color: #6b7280;
+    font-size: 0.92rem;
+}
+
+.welcome-band,
+.data-surface,
+.form-surface,
+.confirm-panel,
+.feature-tile,
+.status-panel,
+.message-page {
+    background: #ffffff;
+    border: 1px solid #e5e7eb;
+    border-radius: 8px;
+    box-shadow: 0 14px 30px rgba(31, 41, 55, 0.08);
+}
+
+.welcome-band {
+    padding: 34px;
+}
+
+.section-kicker {
+    color: var(--helamiel-primary-dark);
+    font-weight: 700;
+    letter-spacing: 0;
+    text-transform: uppercase;
+    font-size: 0.78rem;
+}
+
+.display-title {
+    font-size: clamp(2rem, 4vw, 3.4rem);
+    line-height: 1.05;
+    font-weight: 800;
+    letter-spacing: 0;
+}
+
+.page-heading {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    margin-bottom: 18px;
+}
+
+.page-heading h1 {
+    margin: 0;
+    font-size: 1.8rem;
+    font-weight: 760;
+}
+
+.status-panel {
+    padding: 20px;
+}
+
+.status-item {
+    display: flex;
+    gap: 14px;
+    padding: 14px 0;
+    border-bottom: 1px solid #edf1f5;
+}
+
+.status-item:last-child {
+    border-bottom: 0;
+}
+
+.status-item span:last-child,
+.status-item div span {
+    display: block;
+    color: #6b7280;
+}
+
+.status-icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    flex: 0 0 42px;
+    width: 42px;
+    height: 42px;
+    border-radius: 8px;
+    color: #ffffff;
+}
+
+.bg-pink {
+    background: var(--helamiel-pink);
+}
+
+.bg-mint {
+    background: var(--helamiel-mint);
+}
+
+.bg-cream {
+    background: #e2a93b;
+}
+
+.feature-tile {
+    height: 100%;
+    padding: 22px;
+}
+
+.feature-tile i {
+    color: var(--helamiel-primary);
+    font-size: 1.8rem;
+}
+
+.feature-tile h2 {
+    margin: 12px 0 8px;
+    font-size: 1.15rem;
+    font-weight: 700;
+}
+
+.feature-tile p {
+    color: #6b7280;
+    margin-bottom: 0;
+}
+
+.toolbar-form {
+    display: grid;
+    grid-template-columns: auto minmax(160px, 240px) auto auto;
+    align-items: center;
+    gap: 10px;
+}
+
+.data-surface {
+    overflow: hidden;
+}
+
+.table thead th {
+    background: #eef6ff;
+    color: #25415f;
+    border-bottom: 1px solid #d6e8f7;
+}
+
+.actions-cell {
+    white-space: nowrap;
+}
+
+.form-surface {
+    padding: 24px;
+}
+
+.form-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin-top: 24px;
+}
+
+.confirm-panel {
+    display: flex;
+    gap: 18px;
+    padding: 24px;
+}
+
+.confirm-icon,
+.message-icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 56px;
+    height: 56px;
+    border-radius: 8px;
+    background: #fff4d1;
+    color: #b7791f;
+    font-size: 1.6rem;
+}
+
+.message-page {
+    max-width: 720px;
+    margin: 0 auto;
+    padding: 36px;
+    text-align: center;
+}
+
+.message-page .message-icon {
+    margin-bottom: 16px;
+}
+
+@media (max-width: 768px) {
+    .welcome-band,
+    .form-surface,
+    .confirm-panel,
+    .message-page {
+        padding: 20px;
+    }
+
+    .page-heading {
+        align-items: stretch;
+        flex-direction: column;
+    }
+
+    .toolbar-form {
+        grid-template-columns: 1fr;
+    }
+
+    .confirm-panel {
+        flex-direction: column;
+    }
+}

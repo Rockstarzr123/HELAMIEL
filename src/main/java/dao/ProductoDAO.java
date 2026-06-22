@@ -30,6 +30,7 @@ public class ProductoDAO {
     private static final String SQL_LISTAR = """
             SELECT id_producto, nombre, categoria, precio, stock, estado
             FROM Productos
+            ORDER BY id_producto DESC
             """;
 
     private static final String SQL_BUSCAR = """
@@ -47,6 +48,21 @@ public class ProductoDAO {
     private static final String SQL_ELIMINAR = """
             DELETE FROM Productos
             WHERE id_producto = ?
+            """;
+
+    private static final String SQL_EXISTE_NOMBRE_CATEGORIA = """
+            SELECT COUNT(*) AS total
+            FROM Productos
+            WHERE LOWER(nombre) = LOWER(?)
+            AND LOWER(categoria) = LOWER(?)
+            """;
+
+    private static final String SQL_EXISTE_NOMBRE_CATEGORIA_EXCLUYENDO_ID = """
+            SELECT COUNT(*) AS total
+            FROM Productos
+            WHERE LOWER(nombre) = LOWER(?)
+            AND LOWER(categoria) = LOWER(?)
+            AND id_producto <> ?
             """;
 
     /**
@@ -120,6 +136,52 @@ public class ProductoDAO {
         }
 
         return Optional.empty();
+    }
+
+    /**
+     * Verifica si ya existe un producto con el mismo nombre y categoria.
+     *
+     * @param nombre nombre del producto.
+     * @param categoria categoria del producto.
+     * @return true si existe un producto duplicado.
+     */
+    public boolean existeProductoPorNombreYCategoria(String nombre, String categoria) {
+        return existeProductoPorNombreYCategoria(nombre, categoria, 0);
+    }
+
+    /**
+     * Verifica duplicidad excluyendo un producto especifico, util para edicion.
+     *
+     * @param nombre nombre del producto.
+     * @param categoria categoria del producto.
+     * @param idProductoExcluir identificador que no se debe considerar duplicado.
+     * @return true si existe otro producto con el mismo nombre y categoria.
+     */
+    public boolean existeProductoPorNombreYCategoria(String nombre, String categoria, int idProductoExcluir) {
+        String consulta = idProductoExcluir > 0
+                ? SQL_EXISTE_NOMBRE_CATEGORIA_EXCLUYENDO_ID
+                : SQL_EXISTE_NOMBRE_CATEGORIA;
+
+        try (Connection conexion = Conexion.getConnection();
+                PreparedStatement sentencia = conexion.prepareStatement(consulta)) {
+
+            sentencia.setString(1, nombre);
+            sentencia.setString(2, categoria);
+
+            if (idProductoExcluir > 0) {
+                sentencia.setInt(3, idProductoExcluir);
+            }
+
+            try (ResultSet resultado = sentencia.executeQuery()) {
+                if (resultado.next()) {
+                    return resultado.getInt("total") > 0;
+                }
+            }
+        } catch (SQLException exception) {
+            LOGGER.log(Level.SEVERE, "Error al validar duplicidad del producto.", exception);
+        }
+
+        return false;
     }
 
     /**
