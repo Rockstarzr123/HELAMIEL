@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+
+<meta charset="UTF-8">
+
+<title>Gestión de Rutas</title>
+
+</head>
+
+<body>
+
+<p><a th:href="@{/productos}">Ir a Gestión de Productos</a></p>
+
+<h1>Registro de rutas</h1>
+
+<form action="/guardar" method="post">
+
+Origen
+
+<input type="text" name="origen">
+
+<br><br>
+
+Destino
+
+<input type="text" name="destino">
+
+<br><br>
+
+Distancia
+
+<input type="number" step="0.1" name="distancia">
+
+<br><br>
+
+<button type="submit">
+
+Guardar
+
+</button>
+
+</form>
+
+<hr>
+
+<h2>Rutas registradas</h2>
+
+<table border="1">
+
+<tr>
+
+<th>ID</th>
+
+<th>Origen</th>
+
+<th>Destino</th>
+
+<th>Distancia</th>
+
+</tr>
+
+<tr th:each="ruta : ${rutas}">
+
+<td th:text="${ruta.id}"></td>
+
+<td th:text="${ruta.origen}"></td>
+
+<td th:text="${ruta.destino}"></td>
+
+<td th:text="${ruta.distancia}"></td>
+
+</tr>
+
+</table>
+
+</body>
+
+</html>
