@@ -1,184 +1,160 @@
-# HELAMIEL-WEB
+# HELAMIEL
 
-## Descripcion
+## Descripción
 
-HELAMIEL-WEB es una aplicacion Java Web para la administracion de productos de una heladeria. El sistema implementa un CRUD completo de productos usando Servlets, JSP, JDBC y MySQL, manteniendo una arquitectura MVC y reutilizando el modelo, el DAO y la conexion del proyecto de escritorio desarrollado previamente.
+HELAMIEL es una aplicación web desarrollada con **Spring Boot** para la gestión de una heladería artesanal. El sistema implementa un panel administrativo de productos (CRUD completo con búsqueda y filtros), un módulo de rutas de reparto y un módulo de autenticación con **API REST**, expuesto además como página de login web con control de sesión.
 
-La aplicacion permite registrar, consultar, buscar por ID, editar y eliminar productos desde una interfaz web responsive construida con HTML5, CSS3 y Bootstrap 5.
+El proyecto evolucionó desde una versión de escritorio/JDBC hacia una aplicación web completa basada en Spring MVC, Spring Data JPA y Thymeleaf, manteniendo H2 en memoria para desarrollo y MySQL como motor de base de datos real.
 
-## Tecnologias
+## Tecnologías
 
 - Java 17
+- Spring Boot 3.5.0
+- Spring Web (MVC)
+- Spring Data JPA / Hibernate
+- Spring Security (Password Encoder con BCrypt)
+- Thymeleaf
+- Bean Validation (Jakarta Validation)
+- H2 Database (entorno de desarrollo, en memoria)
+- MySQL + MySQL Connector/J (entorno de producción/real)
+- Bootstrap 5 + Bootstrap Icons
 - Maven
-- Apache Tomcat 10 o superior
-- Jakarta Servlet
-- JSP
-- JSTL
-- JDBC
-- MySQL
-- MySQL Connector/J
-- HTML5
-- CSS3
-- Bootstrap 5
 - Git y GitHub
 
 ## Arquitectura
 
-El proyecto mantiene una separacion MVC:
+El proyecto sigue una arquitectura en capas (Controller → Service → Repository → Model), propia de Spring Boot:
 
-- `modelo`: contiene la clase `Producto`.
-- `dao`: contiene `ProductoDAO`, responsable de las operaciones CRUD con JDBC.
-- `conexion`: contiene `Conexion`, responsable de abrir la conexion con MySQL.
-- `servlet`: contiene los controladores web que reciben peticiones GET y POST.
-- `util`: contiene validaciones y utilidades reutilizables.
-- `src/main/webapp`: contiene recursos web, JSP, CSS, JS e imagenes.
-- `WEB-INF/views`: contiene las paginas JSP protegidas de acceso directo.
+- `controller`: controladores web y REST.
+  - `RutaController`: página de inicio (`/`) y registro de rutas de reparto.
+  - `ProductoController`: panel de productos (`/productos`) — listar, buscar, filtrar, guardar, editar y eliminar.
+  - `AuthController`: API REST de autenticación (`/api/auth/register`, `/api/auth/login`).
+  - `LoginController`: página web de login (`/login`) y cierre de sesión (`/logout`).
+- `service`: lógica de negocio (`ProductoService`, `RutaService`, `AuthService`).
+- `repository`: interfaces `JpaRepository` para acceso a datos (`ProductoRepository`, `RutaRepository`, `UsuarioRepository`).
+- `model`: entidades JPA (`Producto`, `Ruta`, `Usuario`).
+- `dto`: objetos de transferencia usados en formularios y en la API (`ProductoDTO`, `LoginRequest`, `LoginResponse`, `RegistroUsuarioDTO`).
+- `exception`: excepciones de negocio y manejador global (`GlobalExceptionHandler`) para respuestas de error consistentes.
+- `config`: configuración de seguridad (`SecurityConfig`), interceptor de sesión (`SesionInterceptor`) y su registro (`WebConfig`).
+- `dao` / `conexion`: clases heredadas de la versión JDBC previa del proyecto.
+- `src/main/resources/templates`: vistas Thymeleaf (`index.html`, `login.html`, `productos/`, `fragments/layout.html`).
 
 ## Funcionalidades
 
-- Pagina principal del sistema.
+### Panel de productos (`/productos`)
 - Listado responsive de productos.
-- Busqueda de producto por ID.
-- Registro de productos.
-- Edicion de productos.
-- Eliminacion con confirmacion previa.
-- Validaciones en cliente mediante HTML5.
-- Validaciones en servidor mediante Java.
-- Mensajes de exito y error con alertas Bootstrap.
-- Uso de GET para consultar, abrir formularios y confirmar eliminacion.
-- Uso de POST para registrar, actualizar y eliminar definitivamente.
+- Búsqueda por texto libre.
+- Filtro por categoría y por estado (activo/inactivo).
+- Registro de productos desde formulario modal.
+- Edición de productos.
+- Eliminación de productos.
+- Validaciones de formulario en servidor (Bean Validation) con mensajes de error.
+
+### Módulo de rutas (`/`)
+- Página de inicio con listado de rutas registradas (origen, destino, distancia).
+- Registro de nuevas rutas.
+
+### Autenticación
+- **API REST** (`/api/auth`):
+  - `POST /api/auth/register` — registra un usuario nuevo (contraseña cifrada con BCrypt).
+  - `POST /api/auth/login` — valida credenciales y responde el resultado en JSON.
+- **Login web** (`/login`):
+  - Formulario de acceso que reutiliza la misma lógica de `AuthService`.
+  - Guarda al usuario autenticado en sesión HTTP.
+  - Redirige a `/productos` tras un login correcto.
+  - Cierre de sesión desde `/logout`.
+  - Todas las páginas del panel (`/`, `/productos`) están protegidas por `SesionInterceptor`: si no hay sesión activa, redirige a `/login`.
 
 ## Requisitos
 
 - JDK 17 instalado.
-- Maven instalado.
-- Apache Tomcat 10 o superior instalado.
-- MySQL Server instalado y en ejecucion.
-- Base de datos `helamiel` creada con el script SQL del proyecto.
+- Maven instalado (o usar el wrapper `mvnw` incluido en el proyecto).
+- MySQL Server instalado y en ejecución (opcional para desarrollo; H2 en memoria funciona sin instalar nada).
 - Editor recomendado: IntelliJ IDEA, Eclipse, NetBeans o VS Code.
 
-## Configuracion de MySQL
+## Configuración de base de datos
 
-Ejecute el script ubicado en:
+El proyecto trae **H2 en memoria** configurada por defecto en `application.properties`, ideal para desarrollo rápido y pruebas: no requiere instalar nada, pero los datos se pierden al reiniciar la aplicación.
 
-```text
-src/main/resources/sql/helamiel.sql
+```properties
+spring.datasource.url=${DB_URL:jdbc:h2:mem:testdb;DB_CLOSE_DELAY=-1;DB_CLOSE_ON_EXIT=FALSE}
+spring.datasource.username=${DB_USER:sa}
+spring.datasource.password=${DB_PASSWORD:}
+spring.datasource.driver-class-name=org.h2.Driver
+spring.jpa.hibernate.ddl-auto=create-drop
 ```
 
-Desde MySQL Workbench puede abrir el archivo y ejecutarlo completo.
+### Cambiar a MySQL (datos persistentes)
 
-Desde consola:
+1. Cree la base de datos ejecutando el script:
+
+```text
+sql/productos.sql
+```
+
+2. Configure las variables de entorno antes de levantar la aplicación:
 
 ```powershell
-mysql -u root -p < src\main\resources\sql\helamiel.sql
+set DB_URL=jdbc:mysql://localhost:3306/helamiel?useUnicode=true&characterEncoding=UTF-8&serverTimezone=America/Bogota
+set DB_USER=root
+set DB_PASSWORD=su_password
 ```
 
-Luego verifique:
+3. Cambie en `application.properties`:
 
-```sql
-USE helamiel;
-SELECT * FROM Productos;
+```properties
+spring.datasource.driver-class-name=com.mysql.cj.jdbc.Driver
+spring.jpa.hibernate.ddl-auto=update
 ```
 
-Revise las credenciales de conexion en:
+Con `ddl-auto=update`, Hibernate crea/actualiza automáticamente las tablas faltantes (como `usuarios`) a partir de las entidades.
 
-```text
-src/main/java/conexion/Conexion.java
-```
-
-## Configuracion de Tomcat
-
-1. Instale Apache Tomcat 10 o superior.
-2. Configure Tomcat en el IDE.
-3. Agregue el artefacto Maven generado por el proyecto.
-4. Use el contexto recomendado:
-
-```text
-/HELAMIEL-WEB
-```
-
-5. Inicie el servidor y abra:
-
-```text
-http://localhost:8080/HELAMIEL-WEB/
-```
-
-## Instalacion
+## Instalación
 
 Clone o descargue el repositorio:
 
 ```powershell
 git clone https://github.com/Rockstarzr123/HELAMIEL.git
-cd HELAMIEL-JDBC
+cd HELAMIEL
 ```
 
-Compile el proyecto:
+## Ejecución
 
 ```powershell
-mvn clean package
+./mvnw spring-boot:run
 ```
 
-El archivo WAR se genera en:
+La aplicación queda disponible en:
 
 ```text
-target/HELAMIEL-WEB.war
+http://localhost:9090
 ```
 
-## Ejecucion
+- Página de inicio / rutas: `http://localhost:9090/`
+- Panel de productos: `http://localhost:9090/productos`
+- Login web: `http://localhost:9090/login`
 
-### Opcion 1: desde el IDE
+## Testing de la API con Postman
 
-1. Abra el proyecto como proyecto Maven.
-2. Configure Apache Tomcat.
-3. Despliegue el artefacto `HELAMIEL-WEB.war`.
-4. Ejecute Tomcat.
-5. Abra `http://localhost:8080/HELAMIEL-WEB/`.
+El módulo de autenticación se probó con Postman. La colección con los casos de prueba (registro exitoso, usuario duplicado, validación de contraseña, login correcto e incorrecto) se encuentra en el repositorio de evidencias del curso.
 
-### Opcion 2: despliegue manual
-
-1. Ejecute:
-
-```powershell
-mvn clean package
-```
-
-2. Copie `target/HELAMIEL-WEB.war` en la carpeta `webapps` de Tomcat.
-3. Inicie Tomcat.
-4. Abra:
-
-```text
-http://localhost:8080/HELAMIEL-WEB/
-```
+| Método | Endpoint | Éxito | Error |
+|---|---|---|---|
+| POST | `/api/auth/register` | 201 Created | 409 Conflict / 400 Bad Request |
+| POST | `/api/auth/login` | 200 OK | 401 Unauthorized |
 
 ## Capturas sugeridas para la evidencia
 
-- Pagina principal.
+- Página de login.
+- Login exitoso y redirección al panel de productos.
+- Intento de acceso a `/productos` sin sesión (redirección a `/login`).
 - Listado de productos.
-- Formulario de registro.
-- Producto registrado correctamente.
-- Busqueda por ID.
-- Formulario de edicion.
-- Producto actualizado correctamente.
-- Confirmacion de eliminacion.
-- Producto eliminado correctamente.
-- Validacion de campos obligatorios.
-- Validacion de precio negativo.
-- Validacion de stock invalido.
-- Mensaje de duplicidad de producto.
-- Proyecto ejecutandose en Tomcat.
+- Registro, edición y eliminación de un producto.
+- Búsqueda y filtros de productos.
+- Registro de una ruta desde la página de inicio.
+- Requests de Postman: registro y login (casos de éxito y error).
+- Proyecto ejecutándose (`spring-boot:run`).
 - Repositorio Git/GitHub actualizado.
-
-## Versionamiento sugerido
-
-```powershell
-git status
-git add .
-git commit -m "config: convertir proyecto a aplicacion web con Maven"
-git commit -m "feat: implementar CRUD de productos con Servlets y JSP"
-git commit -m "style: crear interfaz Bootstrap para HELAMIEL"
-git commit -m "test: agregar validaciones del modulo de productos"
-git push origin main
-```
 
 ## Autor
 
