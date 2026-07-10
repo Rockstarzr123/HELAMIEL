@@ -29,7 +29,12 @@
     <div class="topbar-spacer"></div>
 
     <div class="topbar-user">
-        <span class="topbar-user-name"><i class="bi bi-person-circle"></i> Administrador</span>
+        <span class="topbar-user-name"><i class="bi bi-person-circle"></i>
+            <span th:text="${session.usuarioLogueado} ?: 'Administrador'">Administrador</span>
+        </span>
+        <a th:href="@{/logout}" class="btn-icon" title="Cerrar sesion">
+            <i class="bi bi-box-arrow-right"></i>
+        </a>
     </div>
 </nav>
 

@@ -2,20 +2,28 @@ package com.helamiel.helamiel.config;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.security.config.annotation.web.builders.HttpSecurity;
+import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.security.web.SecurityFilterChain;
 
 /**
- * Configuracion minima de seguridad para el modulo de autenticacion.
+ * Configuracion de seguridad para el modulo de autenticacion.
  *
- * <p>Expone unicamente el bean {@link PasswordEncoder} (implementado con
- * BCrypt) necesario para cifrar y verificar contrasenas de usuario.</p>
+ * <p>Expone el bean {@link PasswordEncoder} (implementado con BCrypt)
+ * necesario para cifrar y verificar contrasenas de usuario.</p>
  *
- * <p>Importante: esta clase NO habilita Spring Security como framework
- * (no hay {@code @EnableWebSecurity} ni {@code SecurityFilterChain}), por lo
- * que no exige autenticacion en ninguna ruta existente del proyecto. Su
- * unico proposito es poner a disposicion el algoritmo de cifrado BCrypt
- * mediante inyeccion de dependencias.</p>
+ * <p>Ademas define explicitamente un {@link SecurityFilterChain} que
+ * permite el acceso publico a todas las rutas. Esto es necesario porque
+ * el proyecto incluye la dependencia {@code spring-boot-starter-security}
+ * en el classpath: sin un filtro propio, Spring Boot activa su seguridad
+ * automatica por defecto (Basic Auth con usuario "user" y una contrasena
+ * aleatoria generada en cada arranque), bloqueando con 401 hasta el propio
+ * endpoint de registro. Como HELAMIEL maneja su propia autenticacion vía
+ * {@code /api/auth/register} y {@code /api/auth/login}, se desactiva aqui
+ * la seguridad automatica de Spring y se deja el control de acceso a la
+ * logica de negocio de {@code AuthController} y {@code AuthService}.</p>
  */
 @Configuration
 public class SecurityConfig {
@@ -33,5 +41,28 @@ public class SecurityConfig {
     @Bean
     public PasswordEncoder passwordEncoder() {
         return new BCryptPasswordEncoder();
+    }
+
+    /**
+     * Define la cadena de filtros de seguridad HTTP.
+     *
+     * <p>Permite el acceso sin autenticacion a todas las rutas (paginas
+     * Thymeleaf y API REST) y desactiva CSRF, ya que la API se consume
+     * con clientes como Postman que no manejan token CSRF de sesion.</p>
+     *
+     * @param http configurador de seguridad HTTP proporcionado por Spring.
+     * @return cadena de filtros lista para usar.
+     * @throws Exception si ocurre un error al construir la configuracion.
+     */
+    @Bean
+    public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
+        http
+                .csrf(csrf -> csrf.disable())
+                .authorizeHttpRequests(auth -> auth.anyRequest().permitAll())
+                .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+                .httpBasic(basic -> basic.disable())
+                .formLogin(form -> form.disable());
+
+        return http.build();
     }
 }
