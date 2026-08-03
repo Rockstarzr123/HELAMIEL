@@ -1,29 +1,24 @@
 package com.helamiel.helamiel.model;
 
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
-import jakarta.persistence.Table;
-
+import jakarta.persistence.*;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
 /**
- * Representa un producto registrado en la base de datos.
+ * Representa un producto del sistema HELAMIEL.
  *
- * <p>La entidad se mapea sobre la tabla {@code Productos} y es administrada
- * mediante Spring Data JPA desde {@code ProductoRepository}.</p>
+ * <p>La entidad se mapea sobre la tabla {@code productos} y es administrada
+ * mediante Spring Data JPA desde {@code ProductoRepository}. Gestiona el
+ * catálogo de productos disponibles para la tienda.</p>
  */
 @Entity
-@Table(name = "Productos")
+@Table(name = "productos")
 public class Producto {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id_producto")
-    private int idProducto;
+    private Long id;
 
     @Column(name = "nombre", nullable = false, length = 100)
     private String nombre;
@@ -47,177 +42,133 @@ public class Producto {
     private LocalDateTime fechaRegistro;
 
     /**
-     * Crea un producto sin datos iniciales. Requerido por JPA e Hibernate.
+     * Constructor vacío requerido por JPA y Hibernate.
      */
     public Producto() {
     }
 
     /**
-     * Crea un producto con sus datos basicos (constructor historico, se
-     * mantiene por compatibilidad con el codigo y las pruebas existentes).
+     * Crea un producto con todos sus datos.
      *
-     * @param idProducto identificador unico del producto.
-     * @param nombre nombre comercial del producto.
-     * @param categoria categoria a la que pertenece el producto.
-     * @param precio precio del producto.
-     * @param stock cantidad disponible.
-     * @param estado indica si el producto esta activo.
+     * @param nombre     nombre del producto
+     * @param descripcion descripción opcional del producto
+     * @param categoria  categoría del producto
+     * @param precio     precio del producto (debe ser > 0)
+     * @param stock      cantidad disponible en stock (>= 0)
+     * @param fechaRegistro fecha de registro del producto
      */
-    public Producto(int idProducto, String nombre, String categoria, BigDecimal precio, int stock, boolean estado) {
-        this.idProducto = idProducto;
-        this.nombre = nombre;
-        this.categoria = categoria;
-        this.precio = precio;
-        this.stock = stock;
-        this.estado = estado;
-    }
-
-    /**
-     * Crea un producto con todos sus datos, incluyendo los campos
-     * incorporados para la evidencia GA7-220501096-AA4-EV03.
-     *
-     * @param idProducto identificador unico del producto.
-     * @param nombre nombre comercial del producto.
-     * @param descripcion descripcion detallada del producto.
-     * @param categoria categoria a la que pertenece el producto.
-     * @param precio precio del producto.
-     * @param stock cantidad disponible.
-     * @param estado indica si el producto esta activo.
-     * @param fechaRegistro fecha y hora en que se registro el producto.
-     */
-    public Producto(int idProducto, String nombre, String descripcion, String categoria, BigDecimal precio,
-            int stock, boolean estado, LocalDateTime fechaRegistro) {
-        this.idProducto = idProducto;
+    public Producto(String nombre, String descripcion, String categoria, 
+                    BigDecimal precio, int stock, LocalDateTime fechaRegistro) {
         this.nombre = nombre;
         this.descripcion = descripcion;
         this.categoria = categoria;
         this.precio = precio;
         this.stock = stock;
+        this.estado = true;
+        this.fechaRegistro = fechaRegistro != null ? fechaRegistro : LocalDateTime.now();
+    }
+
+    public Producto(int id, String nombre, String categoria, BigDecimal precio, int stock, boolean estado) {
+        this.id = (long) id;
+        this.nombre = nombre;
+        this.categoria = categoria;
+        this.precio = precio;
+        this.stock = stock;
         this.estado = estado;
-        this.fechaRegistro = fechaRegistro;
+        this.fechaRegistro = LocalDateTime.now();
     }
 
-    /**
-     * @return identificador unico del producto.
-     */
+    // Getters y Setters
+
+    public Long getId() {
+        return id;
+    }
+
+    public void setId(Long id) {
+        this.id = id;
+    }
+
+    public void setId(int id) {
+        this.id = (long) id;
+    }
+
     public int getIdProducto() {
-        return idProducto;
+        return id != null ? id.intValue() : 0;
     }
 
-    /**
-     * @param idProducto identificador unico del producto.
-     */
     public void setIdProducto(int idProducto) {
-        this.idProducto = idProducto;
+        this.id = (long) idProducto;
     }
 
-    /**
-     * @return nombre comercial del producto.
-     */
+    public void setIdProducto(Long idProducto) {
+        this.id = idProducto;
+    }
+
     public String getNombre() {
         return nombre;
     }
 
-    /**
-     * @param nombre nombre comercial del producto.
-     */
     public void setNombre(String nombre) {
         this.nombre = nombre;
     }
 
-    /**
-     * @return descripcion detallada del producto.
-     */
     public String getDescripcion() {
         return descripcion;
     }
 
-    /**
-     * @param descripcion descripcion detallada del producto.
-     */
     public void setDescripcion(String descripcion) {
         this.descripcion = descripcion;
     }
 
-    /**
-     * @return categoria a la que pertenece el producto.
-     */
     public String getCategoria() {
         return categoria;
     }
 
-    /**
-     * @param categoria categoria a la que pertenece el producto.
-     */
     public void setCategoria(String categoria) {
         this.categoria = categoria;
     }
 
-    /**
-     * @return precio del producto.
-     */
     public BigDecimal getPrecio() {
         return precio;
     }
 
-    /**
-     * @param precio precio del producto.
-     */
     public void setPrecio(BigDecimal precio) {
         this.precio = precio;
     }
 
-    /**
-     * @return cantidad disponible.
-     */
     public int getStock() {
         return stock;
     }
 
-    /**
-     * @param stock cantidad disponible.
-     */
     public void setStock(int stock) {
         this.stock = stock;
     }
 
-    /**
-     * @return true si el producto esta activo.
-     */
     public boolean isEstado() {
         return estado;
     }
 
-    /**
-     * @param estado indica si el producto esta activo.
-     */
     public void setEstado(boolean estado) {
         this.estado = estado;
     }
 
-    /**
-     * @return fecha y hora en que se registro el producto.
-     */
     public LocalDateTime getFechaRegistro() {
         return fechaRegistro;
     }
 
-    /**
-     * @param fechaRegistro fecha y hora en que se registro el producto.
-     */
     public void setFechaRegistro(LocalDateTime fechaRegistro) {
         this.fechaRegistro = fechaRegistro;
     }
 
     @Override
     public String toString() {
-        return "Producto{"
-                + "idProducto=" + idProducto
-                + ", nombre='" + nombre + '\''
-                + ", categoria='" + categoria + '\''
-                + ", precio=" + precio
-                + ", stock=" + stock
-                + ", estado=" + estado
-                + '}';
+        return "Producto{" +
+                "idProducto=" + getIdProducto() +
+                ", nombre='" + nombre + '\'' +
+                ", categoria='" + categoria + '\'' +
+                ", precio=" + precio +
+                ", stock=" + stock +
+                ", estado=" + estado +
+                '}';
     }
 }

@@ -3,6 +3,7 @@ package com.helamiel.helamiel.config;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
+import org.springframework.lang.NonNull;
 import org.springframework.web.servlet.HandlerInterceptor;
 
 /**
@@ -17,7 +18,7 @@ public class SesionInterceptor implements HandlerInterceptor {
     private static final String ATRIBUTO_SESION_USUARIO = "usuarioLogueado";
 
     @Override
-    public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler)
+    public boolean preHandle(@NonNull HttpServletRequest request, @NonNull HttpServletResponse response, @NonNull Object handler)
             throws Exception {
 
         HttpSession session = request.getSession(false);

@@ -197,7 +197,7 @@ public class ProductoDAO {
                 PreparedStatement sentencia = conexion.prepareStatement(SQL_ACTUALIZAR)) {
 
             asignarParametrosProducto(sentencia, producto);
-            sentencia.setInt(6, producto.getIdProducto());
+            sentencia.setInt(6, producto.getId().intValue());
 
             return sentencia.executeUpdate() > 0;
         } catch (SQLException exception) {
@@ -252,7 +252,7 @@ public class ProductoDAO {
     private void asignarIdGenerado(PreparedStatement sentencia, Producto producto) throws SQLException {
         try (ResultSet clavesGeneradas = sentencia.getGeneratedKeys()) {
             if (clavesGeneradas.next()) {
-                producto.setIdProducto(clavesGeneradas.getInt(1));
+                producto.setId(clavesGeneradas.getInt(1));
             }
         }
     }
@@ -267,7 +267,7 @@ public class ProductoDAO {
     private Producto mapearProducto(ResultSet resultado) throws SQLException {
         Producto producto = new Producto();
 
-        producto.setIdProducto(resultado.getInt("id_producto"));
+        producto.setId(resultado.getInt("id_producto"));
         producto.setNombre(resultado.getString("nombre"));
         producto.setCategoria(resultado.getString("categoria"));
         producto.setPrecio(resultado.getBigDecimal("precio"));

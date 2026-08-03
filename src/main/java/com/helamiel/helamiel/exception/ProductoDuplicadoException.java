@@ -15,4 +15,13 @@ public class ProductoDuplicadoException extends RuntimeException {
     public ProductoDuplicadoException(String nombre, String categoria) {
         super("Ya existe un producto llamado \"" + nombre + "\" en la categoria \"" + categoria + "\".");
     }
+
+    /**
+     * Crea la excepcion cuando solo se conoce el nombre del producto duplicado.
+     *
+     * @param nombre nombre del producto duplicado.
+     */
+    public ProductoDuplicadoException(String nombre) {
+        super("Ya existe un producto llamado \"" + nombre + "\".");
+    }
 }

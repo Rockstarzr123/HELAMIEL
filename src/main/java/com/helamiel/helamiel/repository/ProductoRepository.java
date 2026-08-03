@@ -6,6 +6,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
 import java.util.List;
+import java.util.Optional;
 
 /**
  * Repositorio Spring Data JPA para el acceso a datos de {@link Producto}.
@@ -15,14 +16,19 @@ import java.util.List;
  * Productos (busqueda por texto, filtro por categoria y validacion de
  * duplicados).</p>
  */
-public interface ProductoRepository extends JpaRepository<Producto, Integer> {
+public interface ProductoRepository extends JpaRepository<Producto, Long> {
 
     /**
      * Lista todos los productos del mas reciente al mas antiguo.
      *
      * @return lista completa de productos ordenada por id descendente.
      */
+    List<Producto> findAllByOrderByIdDesc();
+
+    @Query("SELECT p FROM Producto p ORDER BY p.id DESC")
     List<Producto> findAllByOrderByIdProductoDesc();
+
+    Optional<Producto> findById(int id);
 
     /**
      * Busca productos cuyo nombre, descripcion o categoria contengan el
@@ -36,7 +42,7 @@ public interface ProductoRepository extends JpaRepository<Producto, Integer> {
             WHERE LOWER(p.nombre) LIKE LOWER(CONCAT('%', :texto, '%'))
                OR LOWER(p.descripcion) LIKE LOWER(CONCAT('%', :texto, '%'))
                OR LOWER(p.categoria) LIKE LOWER(CONCAT('%', :texto, '%'))
-            ORDER BY p.idProducto DESC
+            ORDER BY p.id DESC
             """)
     List<Producto> buscarPorTexto(@Param("texto") String texto);
 
@@ -46,7 +52,7 @@ public interface ProductoRepository extends JpaRepository<Producto, Integer> {
      * @param categoria categoria por la cual filtrar.
      * @return lista de productos de la categoria indicada.
      */
-    List<Producto> findByCategoriaIgnoreCaseOrderByIdProductoDesc(String categoria);
+    List<Producto> findByCategoriaIgnoreCaseOrderByIdDesc(String categoria);
 
     /**
      * Lista los productos filtrando por su estado (activo/inactivo).
@@ -54,7 +60,31 @@ public interface ProductoRepository extends JpaRepository<Producto, Integer> {
      * @param estado estado por el cual filtrar.
      * @return lista de productos con el estado indicado.
      */
-    List<Producto> findByEstadoOrderByIdProductoDesc(boolean estado);
+    List<Producto> findByEstadoOrderByIdDesc(boolean estado);
+
+    /**
+     * Lista los productos por categoria e estado.
+     *
+     * @param categoria categoria por la cual filtrar.
+     * @param estado estado por el cual filtrar.
+     * @return lista de productos con la categoria y estado indicados.
+     */
+    List<Producto> findByCategoriaIgnoreCaseAndEstadoOrderByIdDesc(String categoria, boolean estado);
+
+    /**
+     * Busca productos por nombre y categoria, utilizando criterios opcionales.
+     *
+     * @param nombre nombre a buscar.
+     * @param categoria categoria a buscar.
+     * @return lista de productos coincidentes.
+     */
+    @Query("""
+            SELECT p FROM Producto p
+            WHERE (:nombre IS NULL OR LOWER(p.nombre) LIKE LOWER(CONCAT('%', :nombre, '%')))
+              AND (:categoria IS NULL OR LOWER(p.categoria) = LOWER(:categoria))
+            ORDER BY p.id DESC
+            """)
+    List<Producto> buscarProductos(@Param("nombre") String nombre, @Param("categoria") String categoria);
 
     /**
      * Verifica si ya existe un producto con el mismo nombre y categoria,
@@ -69,7 +99,18 @@ public interface ProductoRepository extends JpaRepository<Producto, Integer> {
             SELECT COUNT(p) > 0 FROM Producto p
             WHERE LOWER(p.nombre) = LOWER(:nombre)
               AND LOWER(p.categoria) = LOWER(:categoria)
-              AND p.idProducto <> :idProducto
+              AND p.id <> :idProducto
+            """)
+    boolean existePorNombreYCategoriaExcluyendoId(
+            @Param("nombre") String nombre,
+            @Param("categoria") String categoria,
+            @Param("idProducto") Long idProducto);
+
+    @Query("""
+            SELECT COUNT(p) > 0 FROM Producto p
+            WHERE LOWER(p.nombre) = LOWER(:nombre)
+              AND LOWER(p.categoria) = LOWER(:categoria)
+              AND p.id <> :idProducto
             """)
     boolean existePorNombreYCategoriaExcluyendoId(
             @Param("nombre") String nombre,

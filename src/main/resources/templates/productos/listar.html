@@ -118,7 +118,7 @@
                 </thead>
                 <tbody>
                 <tr th:each="producto : ${productos}">
-                    <td th:text="${producto.idProducto}"></td>
+                    <td th:text="${producto.id}"></td>
                     <td>
                         <p class="cell-title" th:text="${producto.nombre}"></p>
                         <p class="cell-subtitle" th:text="${producto.descripcion}"></p>
@@ -134,11 +134,11 @@
                     <td class="text-center">
                         <div class="table-actions">
                             <button type="button" class="btn-icon-action btn-edit"
-                                    data-bs-toggle="modal" th:data-bs-target="'#modalEditar' + ${producto.idProducto}"
+                                    data-bs-toggle="modal" th:data-bs-target="'#modalEditar' + ${producto.id}"
                                     title="Editar producto">
                                 <i class="bi bi-pencil-square"></i>
                             </button>
-                            <form th:action="@{'/productos/eliminar/' + ${producto.idProducto}}" method="post"
+                            <form th:action="@{'/productos/eliminar/' + ${producto.id}}" method="post"
                                   class="form-eliminar d-inline">
                                 <button type="submit" class="btn-icon-action btn-delete" title="Eliminar producto">
                                     <i class="bi bi-trash3"></i>
@@ -189,11 +189,11 @@
 <!-- ============================================
      MODALES: Editar producto (uno por fila)
      ============================================ -->
-<div class="modal fade" th:each="producto : ${productos}" th:id="'modalEditar' + ${producto.idProducto}"
+<div class="modal fade" th:each="producto : ${productos}" th:id="'modalEditar' + ${producto.id}"
      tabindex="-1" aria-hidden="true">
     <div class="modal-dialog modal-lg modal-dialog-centered">
         <div class="modal-content admin-modal">
-            <form th:action="@{'/productos/editar/' + ${producto.idProducto}}" method="post"
+            <form th:action="@{'/productos/editar/' + ${producto.id}}" method="post"
                   class="needs-validation-custom" novalidate>
                 <div class="modal-header">
                     <h5 class="modal-title"><i class="bi bi-pencil-square"></i> Editar producto</h5>
@@ -229,9 +229,9 @@
                     </div>
                     <div class="form-check form-switch mt-3">
                         <input class="form-check-input" type="checkbox" role="switch" name="estado" value="true"
-                               th:id="'estadoEdit' + ${producto.idProducto}" th:checked="${producto.estado}">
+                               th:id="'estadoEdit' + ${producto.id}" th:checked="${producto.estado}">
                         <input type="hidden" name="_estado" value="on"/>
-                        <label class="form-check-label" th:for="'estadoEdit' + ${producto.idProducto}">Producto activo</label>
+                        <label class="form-check-label" th:for="'estadoEdit' + ${producto.id}">Producto activo</label>
                     </div>
                 </div>
                 <div class="modal-footer">

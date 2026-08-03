@@ -1,60 +1,43 @@
 package com.helamiel.helamiel.exception;
 
+import com.helamiel.helamiel.dto.ApiResponse;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
-import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 /**
- * Manejador global de excepciones para los controladores MVC del proyecto.
- *
- * <p>Traduce las excepciones de negocio en mensajes flash legibles por el
- * usuario y redirige al listado de productos, evitando pantallas de error
- * genericas (stack traces) en la interfaz.</p>
+ * Manejador global de excepciones para las APIs REST.
+ * Proporciona respuestas consistentes y estandarizadas a los clientes.
  */
 @ControllerAdvice
 public class GlobalExceptionHandler {
 
     /**
-     * Maneja el caso en que un producto solicitado no existe.
-     *
-     * @param exception excepcion capturada.
-     * @param redirectAttributes atributos flash para el mensaje al usuario.
-     * @return vista de redireccion al listado de productos.
+     * Maneja excepciones de credenciales inválidas.
      */
-    @ExceptionHandler(ProductoNoEncontradoException.class)
-    public String manejarProductoNoEncontrado(ProductoNoEncontradoException exception,
-            RedirectAttributes redirectAttributes) {
-        redirectAttributes.addFlashAttribute("mensajeError", exception.getMessage());
-        return "redirect:/productos";
+    @ExceptionHandler(CredencialesInvalidasException.class)
+    public ResponseEntity<ApiResponse<Void>> handleCredencialesInvalidas(CredencialesInvalidasException ex) {
+        ApiResponse<Void> response = ApiResponse.error(HttpStatus.UNAUTHORIZED.value(), "CREDENCIALES_INVALIDAS");
+        return new ResponseEntity<>(response, HttpStatus.UNAUTHORIZED);
     }
 
     /**
-     * Maneja el caso en que se intenta registrar/editar un producto
-     * duplicado (mismo nombre y categoria).
-     *
-     * @param exception excepcion capturada.
-     * @param redirectAttributes atributos flash para el mensaje al usuario.
-     * @return vista de redireccion al listado de productos.
+     * Maneja excepciones de usuario duplicado.
      */
-    @ExceptionHandler(ProductoDuplicadoException.class)
-    public String manejarProductoDuplicado(ProductoDuplicadoException exception,
-            RedirectAttributes redirectAttributes) {
-        redirectAttributes.addFlashAttribute("mensajeError", exception.getMessage());
-        return "redirect:/productos";
+    @ExceptionHandler(UsuarioDuplicadoException.class)
+    public ResponseEntity<ApiResponse<Void>> handleUsuarioDuplicado(UsuarioDuplicadoException ex) {
+        ApiResponse<Void> response = ApiResponse.error(HttpStatus.CONFLICT.value(), "USUARIO_DUPLICADO");
+        return new ResponseEntity<>(response, HttpStatus.CONFLICT);
     }
 
     /**
-     * Maneja cualquier otro error no controlado del modulo de productos,
-     * evitando exponer detalles tecnicos al usuario final.
-     *
-     * @param exception excepcion capturada.
-     * @param redirectAttributes atributos flash para el mensaje al usuario.
-     * @return vista de redireccion al listado de productos.
+     * Maneja excepciones no encontradas (ResourceNotFound).
      */
     @ExceptionHandler(Exception.class)
-    public String manejarErrorGeneral(Exception exception, RedirectAttributes redirectAttributes) {
-        redirectAttributes.addFlashAttribute("mensajeError",
-                "Ocurrio un error inesperado. Intenta nuevamente.");
-        return "error";
+    public ResponseEntity<ApiResponse<Void>> handleGenericException(Exception ex) {
+        String errorMsg = ex.getMessage() != null ? ex.getMessage() : "Error interno del servidor";
+        ApiResponse<Void> response = ApiResponse.error(HttpStatus.INTERNAL_SERVER_ERROR.value(), errorMsg);
+        return new ResponseEntity<>(response, HttpStatus.INTERNAL_SERVER_ERROR);
     }
 }

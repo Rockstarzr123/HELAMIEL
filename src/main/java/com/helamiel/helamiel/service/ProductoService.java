@@ -5,182 +5,208 @@ import com.helamiel.helamiel.exception.ProductoDuplicadoException;
 import com.helamiel.helamiel.exception.ProductoNoEncontradoException;
 import com.helamiel.helamiel.model.Producto;
 import com.helamiel.helamiel.repository.ProductoRepository;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Objects;
+import java.util.Optional;
 
 /**
- * Contiene la logica de negocio del modulo de Gestion de Productos:
- * registro, consulta, edicion, eliminacion, busqueda y filtrado.
- *
- * <p>Se apoya en {@link ProductoRepository} (Spring Data JPA) para el
- * acceso a datos y aplica las validaciones de negocio (duplicados,
- * existencia) antes de delegar en el repositorio.</p>
+ * Servicio para gestión de productos.
  */
 @Service
+@Transactional
 public class ProductoService {
 
-    private final ProductoRepository productoRepository;
+    @Autowired
+    private ProductoRepository productoRepository;
 
-    /**
-     * Crea el servicio inyectando el repositorio de productos.
-     *
-     * @param productoRepository repositorio JPA de productos.
-     */
+    public ProductoService() {
+    }
+
     public ProductoService(ProductoRepository productoRepository) {
         this.productoRepository = productoRepository;
     }
 
     /**
-     * Lista todos los productos registrados, del mas reciente al mas antiguo.
-     *
-     * @return lista completa de productos.
+     * Obtiene todos los productos activos.
+     */
+    public List<Producto> getAllProductos() {
+        return productoRepository.findByEstadoOrderByIdDesc(true);
+    }
+
+    /**
+     * Obtiene un producto por su ID.
+     */
+    public Optional<Producto> getProductoById(Long id) {
+        return productoRepository.findById(id);
+    }
+
+    /**
+     * Crea un nuevo producto.
+     */
+    public Producto crearProducto(Producto producto) {
+        return productoRepository.save(producto);
+    }
+
+    /**
+     * Actualiza un producto existente.
+     */
+    public Producto actualizarProducto(Long id, Producto detallesProducto) {
+        Optional<Producto> optional = productoRepository.findById(id);
+        if (optional.isPresent()) {
+            Producto producto = optional.get();
+            producto.setNombre(detallesProducto.getNombre());
+            producto.setDescripcion(detallesProducto.getDescripcion());
+            producto.setCategoria(detallesProducto.getCategoria());
+            producto.setPrecio(detallesProducto.getPrecio());
+            producto.setStock(detallesProducto.getStock());
+            producto.setEstado(detallesProducto.isEstado());
+            producto.setFechaRegistro(detallesProducto.getFechaRegistro());
+            return productoRepository.save(producto);
+        }
+        throw new RuntimeException("Producto no encontrado");
+    }
+
+    /**
+     * Elimina un producto por ID (soft delete).
+     */
+    public void eliminarProducto(int id) {
+        Producto producto = buscarProducto(id);
+        productoRepository.delete(producto);
+    }
+
+    public void eliminarProducto(Long id) {
+        Producto producto = buscarProducto(id);
+        productoRepository.delete(producto);
+    }
+
+    /**
+     * Busca productos por texto libre en nombre, descripción o categoría.
+     */
+    public List<Producto> buscarPorTexto(String texto) {
+        return productoRepository.buscarPorTexto(texto);
+    }
+
+    /**
+     * Busca productos por nombre y categoría.
+     */
+    public List<Producto> buscarProductos(String nombre, String categoria) {
+        return productoRepository.buscarProductos(nombre, categoria);
+    }
+
+    /**
+     * Obtiene productos por categoría.
+     */
+    public List<Producto> getProductosPorCategoria(String categoria) {
+        return productoRepository.findByCategoriaIgnoreCaseOrderByIdDesc(categoria);
+    }
+
+    /**
+     * Obtiene el listado completo de productos.
      */
     public List<Producto> listarProductos() {
         return productoRepository.findAllByOrderByIdProductoDesc();
     }
 
     /**
-     * Busca un producto por su identificador.
-     *
-     * @param idProducto identificador del producto.
-     * @return producto encontrado.
-     * @throws ProductoNoEncontradoException si no existe un producto con ese id.
-     */
-    public Producto buscarProducto(int idProducto) {
-        return productoRepository.findById(idProducto)
-                .orElseThrow(() -> new ProductoNoEncontradoException(idProducto));
-    }
-
-    /**
-     * Registra un nuevo producto a partir de los datos del formulario.
-     *
-     * @param productoDTO datos del producto a registrar.
-     * @return producto guardado, con su identificador generado.
-     * @throws ProductoDuplicadoException si ya existe un producto con el
-     *         mismo nombre y categoria.
-     */
-    public Producto guardarProducto(ProductoDTO productoDTO) {
-        validarDuplicado(productoDTO, 0);
-
-        Producto producto = new Producto();
-        copiarDatos(productoDTO, producto);
-        producto.setFechaRegistro(LocalDateTime.now());
-
-        return productoRepository.save(producto);
-    }
-
-    /**
-     * Actualiza los datos de un producto existente.
-     *
-     * @param idProducto identificador del producto a editar.
-     * @param productoDTO datos actualizados del producto.
-     * @return producto actualizado.
-     * @throws ProductoNoEncontradoException si el producto no existe.
-     * @throws ProductoDuplicadoException si los nuevos datos chocan con otro
-     *         producto existente.
-     */
-    @SuppressWarnings("null")
-    public Producto editarProducto(int idProducto, ProductoDTO productoDTO) {
-        Producto producto = buscarProducto(idProducto);
-
-        validarDuplicado(productoDTO, idProducto);
-
-        copiarDatos(productoDTO, producto);
-
-        return productoRepository.save(producto);
-    }
-
-    /**
-     * Elimina un producto por su identificador.
-     *
-     * @param idProducto identificador del producto a eliminar.
-     * @throws ProductoNoEncontradoException si el producto no existe.
-     */
-    @SuppressWarnings("null")
-    public void eliminarProducto(int idProducto) {
-        Producto producto = buscarProducto(idProducto);
-        productoRepository.delete(producto);
-    }
-
-    /**
-     * Busca productos por texto libre (nombre, descripcion o categoria).
-     *
-     * @param texto texto a buscar; si es nulo o vacio se listan todos.
-     * @return lista de productos que coinciden con la busqueda.
-     */
-    public List<Producto> buscarPorTexto(String texto) {
-        if (texto == null || texto.isBlank()) {
-            return listarProductos();
-        }
-        return productoRepository.buscarPorTexto(texto.trim());
-    }
-
-    /**
-     * Filtra productos por categoria y/o estado.
-     *
-     * @param categoria categoria por la cual filtrar (opcional).
-     * @param estado estado por el cual filtrar (opcional).
-     * @return lista de productos que cumplen el filtro solicitado.
-     */
-    public List<Producto> filtrarProductos(String categoria, Boolean estado) {
-        List<Producto> productos = listarProductos();
-
-        if (categoria != null && !categoria.isBlank()) {
-            productos = productos.stream()
-                    .filter(p -> p.getCategoria().equalsIgnoreCase(categoria))
-                    .toList();
-        }
-
-        if (estado != null) {
-            productos = productos.stream()
-                    .filter(p -> p.isEstado() == estado)
-                    .toList();
-        }
-
-        return productos;
-    }
-
-    /**
-     * Obtiene la lista de categorias distintas registradas, para alimentar
-     * el filtro del listado en la interfaz.
-     *
-     * @return lista de categorias unicas ordenadas alfabeticamente.
+     * Obtiene las categorias unicas disponibles.
      */
     public List<String> listarCategorias() {
         return productoRepository.listarCategorias();
     }
 
     /**
-     * Valida que no exista otro producto con el mismo nombre y categoria.
-     *
-     * @param productoDTO datos a validar.
-     * @param idProductoExcluir identificador que se debe excluir de la
-     *        validacion (0 cuando es un registro nuevo).
-     * @throws ProductoDuplicadoException si se encuentra un duplicado.
+     * Busca productos a partir de texto y estado opcionales.
      */
-    private void validarDuplicado(ProductoDTO productoDTO, int idProductoExcluir) {
-        boolean existe = productoRepository.existePorNombreYCategoriaExcluyendoId(
-                productoDTO.getNombre(), productoDTO.getCategoria(), idProductoExcluir);
-
-        if (existe) {
-            throw new ProductoDuplicadoException(productoDTO.getNombre(), productoDTO.getCategoria());
+    public List<Producto> filtrarProductos(String categoria, Boolean estado) {
+        if (categoria != null && !categoria.isBlank() && estado != null) {
+            return productoRepository.findByCategoriaIgnoreCaseAndEstadoOrderByIdDesc(categoria, estado);
         }
+        if (categoria != null && !categoria.isBlank()) {
+            return productoRepository.findByCategoriaIgnoreCaseOrderByIdDesc(categoria);
+        }
+        if (estado != null) {
+            return productoRepository.findByEstadoOrderByIdDesc(estado);
+        }
+        return listarProductos();
     }
 
     /**
-     * Copia los datos del DTO del formulario hacia la entidad JPA.
-     *
-     * @param origen datos capturados en el formulario.
-     * @param destino entidad que recibira los datos.
+     * Busca un producto por su ID y devuelve la entidad.
      */
-    private void copiarDatos(ProductoDTO origen, Producto destino) {
-        destino.setNombre(origen.getNombre().trim());
-        destino.setDescripcion(origen.getDescripcion() == null ? null : origen.getDescripcion().trim());
-        destino.setCategoria(origen.getCategoria().trim());
-        destino.setPrecio(origen.getPrecio());
-        destino.setStock(origen.getStock());
-        destino.setEstado(origen.isEstado());
+    public Producto buscarProducto(int id) {
+        return productoRepository.findById(id)
+                .orElseThrow(() -> new ProductoNoEncontradoException(id));
+    }
+
+    public Producto buscarProducto(Long id) {
+        return productoRepository.findById(id)
+                .orElseThrow(() -> new ProductoNoEncontradoException(id.intValue()));
+    }
+
+    /**
+     * Guarda un producto a partir de un DTO.
+     */
+    public Producto guardarProducto(ProductoDTO dto) {
+        Objects.requireNonNull(dto, "El DTO no puede ser nulo.");
+        if (productoRepository.existePorNombreYCategoriaExcluyendoId(dto.getNombre(), dto.getCategoria(), 0)) {
+            throw new ProductoDuplicadoException(dto.getNombre(), dto.getCategoria());
+        }
+        return productoRepository.save(toProducto(dto));
+    }
+
+    /**
+     * Edita un producto a partir de un DTO.
+     */
+    public Producto editarProducto(Long id, ProductoDTO dto) {
+        Optional<Producto> optional = productoRepository.findById(id);
+        if (optional.isPresent()) {
+            Producto producto = optional.get();
+            producto.setNombre(dto.getNombre());
+            producto.setDescripcion(dto.getDescripcion());
+            producto.setCategoria(dto.getCategoria());
+            producto.setPrecio(dto.getPrecio());
+            producto.setStock(dto.getStock());
+            producto.setEstado(dto.isEstado());
+            producto.setFechaRegistro(dto.getFechaRegistro() != null ? dto.getFechaRegistro() : LocalDateTime.now());
+            return productoRepository.save(producto);
+        }
+        throw new RuntimeException("Producto no encontrado");
+    }
+
+    /**
+     * Convierte un Producto a DTO.
+     */
+    public ProductoDTO toDTO(Producto producto) {
+        ProductoDTO dto = new ProductoDTO();
+        dto.setId(producto.getId());
+        dto.setNombre(producto.getNombre());
+        dto.setDescripcion(producto.getDescripcion());
+        dto.setCategoria(producto.getCategoria());
+        dto.setPrecio(producto.getPrecio());
+        dto.setStock(producto.getStock());
+        dto.setEstado(producto.isEstado());
+        dto.setFechaRegistro(producto.getFechaRegistro());
+        return dto;
+    }
+
+    /**
+     * Convierte DTO a Producto.
+     */
+    public Producto toProducto(ProductoDTO dto) {
+        Producto producto = new Producto();
+        producto.setId(dto.getId());
+        producto.setNombre(dto.getNombre());
+        producto.setDescripcion(dto.getDescripcion());
+        producto.setCategoria(dto.getCategoria());
+        producto.setPrecio(dto.getPrecio());
+        producto.setStock(dto.getStock());
+        producto.setEstado(dto.isEstado());
+        producto.setFechaRegistro(dto.getFechaRegistro() != null ? dto.getFechaRegistro() : LocalDateTime.now());
+        return producto;
     }
 }
