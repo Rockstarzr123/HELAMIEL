@@ -140,6 +140,7 @@
                             </button>
                             <form th:action="@{'/productos/eliminar/' + ${producto.id}}" method="post"
                                   class="form-eliminar d-inline">
+                                <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}">
                                 <button type="submit" class="btn-icon-action btn-delete" title="Eliminar producto">
                                     <i class="bi bi-trash3"></i>
                                 </button>
@@ -170,6 +171,7 @@
         <div class="modal-content admin-modal">
             <form th:action="@{/productos/guardar}" th:object="${productoDTO}" method="post"
                   class="needs-validation-custom" novalidate>
+                <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}">
                 <div class="modal-header">
                     <h5 class="modal-title"><i class="bi bi-plus-circle"></i> Registrar nuevo producto</h5>
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
@@ -195,6 +197,7 @@
         <div class="modal-content admin-modal">
             <form th:action="@{'/productos/editar/' + ${producto.id}}" method="post"
                   class="needs-validation-custom" novalidate>
+                <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}">
                 <div class="modal-header">
                     <h5 class="modal-title"><i class="bi bi-pencil-square"></i> Editar producto</h5>
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>

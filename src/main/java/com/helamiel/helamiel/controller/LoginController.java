@@ -4,11 +4,22 @@ import com.helamiel.helamiel.dto.LoginRequest;
 import com.helamiel.helamiel.exception.CredencialesInvalidasException;
 import com.helamiel.helamiel.service.AuthService;
 import jakarta.servlet.http.HttpSession;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import org.springframework.security.core.context.SecurityContext;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.web.context.HttpSessionSecurityContextRepository;
+import org.springframework.security.web.context.SecurityContextRepository;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PostMapping;
+
+import java.util.List;
 
 /**
  * Controlador MVC de la pagina web de inicio de sesion.
@@ -24,6 +35,7 @@ public class LoginController {
     private static final String ATRIBUTO_SESION_USUARIO = "usuarioLogueado";
 
     private final AuthService authService;
+    private final SecurityContextRepository securityContextRepository = new HttpSessionSecurityContextRepository();
 
     public LoginController(AuthService authService) {
         this.authService = authService;
@@ -58,10 +70,17 @@ public class LoginController {
      *         vista de login nuevamente si falla.
      */
     @PostMapping("/login")
-    public String procesarLogin(@ModelAttribute LoginRequest loginRequest, HttpSession session, Model model) {
+    public String procesarLogin(@ModelAttribute LoginRequest loginRequest, HttpSession session, Model model,
+                                HttpServletRequest request, HttpServletResponse response) {
         try {
             authService.iniciarSesion(loginRequest);
             session.setAttribute(ATRIBUTO_SESION_USUARIO, loginRequest.getUsuario());
+            Authentication authentication = UsernamePasswordAuthenticationToken.authenticated(
+                    loginRequest.getUsuario(), null, List.of(new SimpleGrantedAuthority("ROLE_USER")));
+            SecurityContext securityContext = SecurityContextHolder.createEmptyContext();
+            securityContext.setAuthentication(authentication);
+            SecurityContextHolder.setContext(securityContext);
+            securityContextRepository.saveContext(securityContext, request, response);
             return "redirect:/productos";
         } catch (CredencialesInvalidasException excepcion) {
             model.addAttribute("mensajeError", excepcion.getMessage());
@@ -76,8 +95,9 @@ public class LoginController {
      * @param session sesion HTTP actual.
      * @return redireccion a la pagina de login.
      */
-    @GetMapping("/logout")
+    @PostMapping("/logout")
     public String cerrarSesion(HttpSession session) {
+        SecurityContextHolder.clearContext();
         session.invalidate();
         return "redirect:/login";
     }

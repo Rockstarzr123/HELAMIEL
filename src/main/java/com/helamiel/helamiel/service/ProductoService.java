@@ -163,6 +163,11 @@ public class ProductoService {
      * Edita un producto a partir de un DTO.
      */
     public Producto editarProducto(Long id, ProductoDTO dto) {
+        Objects.requireNonNull(id, "El id del producto no puede ser nulo.");
+        Objects.requireNonNull(dto, "El DTO no puede ser nulo.");
+        if (productoRepository.existePorNombreYCategoriaExcluyendoId(dto.getNombre(), dto.getCategoria(), id)) {
+            throw new ProductoDuplicadoException(dto.getNombre(), dto.getCategoria());
+        }
         Optional<Producto> optional = productoRepository.findById(id);
         if (optional.isPresent()) {
             Producto producto = optional.get();

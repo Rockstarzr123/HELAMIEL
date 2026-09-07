@@ -46,3 +46,13 @@ out/
 
 ### VS Code ###
 .vscode/
+docs/PLAN_EVIDENCIAS.md
+ENDPOINTS.md
+docs/DIAGRAMAS.md
+docs/REQUISITOS_Y_CASOS_DE_USO.md
+docs/GA8_AUDITORIA.md
+postman/HELAMIEL.postman_environment.json
+postman/HELAMIEL.postman_collection.json
+postman/README_TESTING.md
+postman/VIDEO_SCRIPT.md
+postman/TEST_RESULTS.md

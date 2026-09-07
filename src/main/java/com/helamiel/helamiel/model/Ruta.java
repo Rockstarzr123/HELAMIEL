@@ -1,6 +1,9 @@
 package com.helamiel.helamiel.model;
 
 import jakarta.persistence.*;
+import jakarta.validation.constraints.DecimalMin;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.Size;
 
 @Entity
 public class Ruta {
@@ -9,8 +12,15 @@ public class Ruta {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    @NotBlank(message = "El origen es obligatorio.")
+    @Size(max = 100, message = "El origen no puede superar 100 caracteres.")
     private String origen;
+
+    @NotBlank(message = "El destino es obligatorio.")
+    @Size(max = 100, message = "El destino no puede superar 100 caracteres.")
     private String destino;
+
+    @DecimalMin(value = "0.01", message = "La distancia debe ser mayor que cero.")
     private double distancia;
 
     public Ruta() {

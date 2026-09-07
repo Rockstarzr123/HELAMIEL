@@ -28,7 +28,7 @@ public interface ProductoRepository extends JpaRepository<Producto, Long> {
     @Query("SELECT p FROM Producto p ORDER BY p.id DESC")
     List<Producto> findAllByOrderByIdProductoDesc();
 
-    Optional<Producto> findById(int id);
+        Optional<Producto> findById(int id);
 
     /**
      * Busca productos cuyo nombre, descripcion o categoria contengan el

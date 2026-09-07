@@ -14,4 +14,8 @@ public class ProductoNoEncontradoException extends RuntimeException {
     public ProductoNoEncontradoException(int idProducto) {
         super("No se encontro el producto con id " + idProducto + ".");
     }
+
+    public ProductoNoEncontradoException(long idProducto) {
+        super("No se encontro el producto con id " + idProducto + ".");
+    }
 }

@@ -2,6 +2,7 @@ package com.helamiel.helamiel.controller;
 
 import com.helamiel.helamiel.model.Ruta;
 import com.helamiel.helamiel.service.RutaService;
+import jakarta.validation.Valid;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
@@ -25,7 +26,7 @@ public class RutaController {
     }
 
     @PostMapping("/guardar")
-    public String guardar(@ModelAttribute Ruta ruta){
+    public String guardar(@Valid @ModelAttribute Ruta ruta){
 
         service.guardar(ruta);
 

@@ -14,7 +14,9 @@
 
 <h1>Registro de rutas</h1>
 
-<form action="/guardar" method="post">
+<form th:action="@{/guardar}" method="post">
+
+<input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}">
 
 Origen
 

@@ -1,5 +1,6 @@
 package com.helamiel.helamiel.config;
 
+import com.helamiel.helamiel.repository.UsuarioRepository;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
@@ -7,6 +8,9 @@ import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.core.userdetails.User;
+import org.springframework.security.core.userdetails.UserDetailsService;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 
 /**
  * Configuracion de seguridad para el modulo de autenticacion.
@@ -43,6 +47,17 @@ public class SecurityConfig {
         return new BCryptPasswordEncoder();
     }
 
+    @Bean
+    public UserDetailsService userDetailsService(UsuarioRepository usuarioRepository) {
+        return username -> usuarioRepository.findByUsuario(username)
+                .filter(usuario -> usuario.isEstado())
+                .map(usuario -> User.withUsername(usuario.getUsuario())
+                        .password(usuario.getPassword())
+                        .roles("USER")
+                        .build())
+                .orElseThrow(() -> new UsernameNotFoundException("Usuario no encontrado."));
+    }
+
     /**
      * Define la cadena de filtros de seguridad HTTP.
      *
@@ -57,9 +72,12 @@ public class SecurityConfig {
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         http
-                .csrf(csrf -> csrf.disable())
-                .authorizeHttpRequests(auth -> auth.anyRequest().permitAll())
-                .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+            .csrf(csrf -> csrf.ignoringRequestMatchers("/api/auth/**"))
+            .authorizeHttpRequests(auth -> auth
+                .requestMatchers("/", "/login", "/api/auth/**", "/css/**", "/js/**", "/img/**",
+                    "/webjars/**", "/swagger-ui/**", "/v3/api-docs/**", "/error").permitAll()
+                .anyRequest().authenticated())
+            .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.IF_REQUIRED))
                 .httpBasic(basic -> basic.disable())
                 .formLogin(form -> form.disable());
 
