@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="description" content="Sitio demostrativo HELAMIEL publicado con GitHub Pages.">
+    <title>HELAMIEL | Sitio web de demostración</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        :root {
+            --helamiel-blue: #145da0;
+            --helamiel-ice: #eaf5ff;
+        }
+
+        body {
+            color: #233142;
+        }
+
+        .hero {
+            background: linear-gradient(130deg, #eaf5ff 0%, #fff 62%, #d9efff 100%);
+        }
+
+        .hero-mark {
+            color: var(--helamiel-blue);
+            font-size: clamp(4rem, 11vw, 8rem);
+            line-height: 1;
+        }
+
+        .feature-card {
+            border: 0;
+            box-shadow: 0 0.75rem 2rem rgba(20, 93, 160, 0.08);
+        }
+
+        .feature-mark {
+            color: var(--helamiel-blue);
+            font-size: 2rem;
+        }
+    </style>
+</head>
+<body>
+<nav class="navbar navbar-expand-lg bg-white border-bottom">
+    <div class="container">
+        <a class="navbar-brand fw-bold text-primary" href="#inicio">HELAMIEL</a>
+        <a class="btn btn-outline-primary btn-sm" href="#caracteristicas">Conocer el sitio</a>
+    </div>
+</nav>
+
+<main>
+    <section id="inicio" class="hero py-5">
+        <div class="container py-lg-5">
+            <div class="row align-items-center g-5">
+                <div class="col-lg-7">
+                    <span class="badge rounded-pill text-bg-primary mb-3">Sitio web publicado en Internet</span>
+                    <h1 class="display-4 fw-bold">Una experiencia dulce, hecha para compartir.</h1>
+                    <p class="lead text-secondary mt-3">
+                        Página de aterrizaje responsive de HELAMIEL, publicada con GitHub Pages
+                        y disponible mediante una dirección web pública.
+                    </p>
+                    <a class="btn btn-primary btn-lg mt-2" href="#caracteristicas">Ver características</a>
+                </div>
+                <div class="col-lg-5 text-center" aria-hidden="true">
+                    <span class="hero-mark">❄</span>
+                    <p class="text-secondary mb-0">HELAMIEL · hecho para compartir</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section id="caracteristicas" class="py-5">
+        <div class="container py-3">
+            <div class="text-center mb-5">
+                <h2 class="fw-bold">Una página clara y adaptable</h2>
+                <p class="text-secondary">Presentación de ejemplo para el despliegue de un sitio estático.</p>
+            </div>
+            <div class="row g-4">
+                <div class="col-md-4">
+                    <article class="card feature-card h-100">
+                        <div class="card-body p-4">
+                            <div class="feature-mark mb-3" aria-hidden="true">❄</div>
+                            <h3 class="h5">Diseño responsive</h3>
+                            <p class="text-secondary mb-0">La estructura se adapta a pantallas de escritorio y móviles.</p>
+                        </div>
+                    </article>
+                </div>
+                <div class="col-md-4">
+                    <article class="card feature-card h-100">
+                        <div class="card-body p-4">
+                            <div class="feature-mark mb-3" aria-hidden="true">✓</div>
+                            <h3 class="h5">Hosting estático</h3>
+                            <p class="text-secondary mb-0">GitHub Pages publica los archivos HTML, CSS y JavaScript del repositorio.</p>
+                        </div>
+                    </article>
+                </div>
+                <div class="col-md-4">
+                    <article class="card feature-card h-100">
+                        <div class="card-body p-4">
+                            <div class="feature-mark mb-3" aria-hidden="true">↗</div>
+                            <h3 class="h5">URL pública</h3>
+                            <p class="text-secondary mb-0">El sitio utiliza el subdominio gratuito github.io de la cuenta.</p>
+                        </div>
+                    </article>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section class="bg-primary text-white py-5">
+        <div class="container text-center py-3">
+            <h2 class="fw-bold">HELAMIEL en la web</h2>
+            <p class="mb-0">Sitio de demostración académico desplegado con hosting estático.</p>
+        </div>
+    </section>
+</main>
+
+<footer class="py-4">
+    <div class="container text-center small text-secondary">
+        Evidencia de hosting gratuito · HELAMIEL · Uso académico
+    </div>
+</footer>
+</body>
+</html>
